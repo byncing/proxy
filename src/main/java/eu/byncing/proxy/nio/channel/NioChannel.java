@@ -21,7 +21,7 @@ public class NioChannel implements Channel {
 
     private Address address;
 
-    public NioChannel(SocketChannel socket) {
+    public NioChannel(SocketChannel socket) throws IOException {
         this.socket = socket;
         this.address = Address.build(socket);
         this.future = new Future(this);
