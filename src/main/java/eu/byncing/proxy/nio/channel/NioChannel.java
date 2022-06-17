@@ -65,7 +65,24 @@ public class NioChannel implements Channel {
 
     @Override
     public Callback<Channel> write(NioBuf buf) {
-        return null;
+        DefaultCallback<Channel> callback = new DefaultCallback<>();
+        callback.run(() -> {
+            try {
+                NioBuf buffer = new NioBuf(0, false);
+                int readable = buf.readable();
+
+                buffer.enlarge((NioBuf.size(readable) + readable));
+                buffer.writeInt(readable);
+                buffer.writeBuf(buf);
+
+                socket.write(buffer.toNio());
+
+                callback.complete(future.channel);
+            } catch (IOException e) {
+                callback.failure(e);
+            }
+        });
+        return callback;
     }
 
     @Override
