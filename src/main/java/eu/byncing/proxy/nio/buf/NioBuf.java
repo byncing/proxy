@@ -19,6 +19,19 @@ public class NioBuf extends ByteBuf {
         this.direct = direct;
     }
 
+    public NioBuf(byte[] bytes) {
+        this.buffer = ByteBuffer.wrap(bytes);
+        this.direct = false;
+    }
+
+    public static int size(int value) {
+        if ((value & 0xFFFFFF80) == 0) return 1;
+        if ((value & 0xFFFFC000) == 0) return 2;
+        if ((value & 0xFFE00000) == 0) return 3;
+        if ((value & 0xF0000000) == 0) return 4;
+        return 5;
+    }
+
     @Override
     public void enlarge(int capacity) {
         ByteBuffer byteBuffer = direct ? ByteBuffer.allocateDirect((capacity + capacity())) : ByteBuffer.allocate((capacity + capacity()));
@@ -139,7 +152,6 @@ public class NioBuf extends ByteBuf {
         byte[] bytes = new byte[readable];
         buf.readBytes(bytes, 0, readable);
 
-
         enlarge(readable);
 
         buffer.put(bytes);
@@ -199,5 +211,9 @@ public class NioBuf extends ByteBuf {
     @Override
     public boolean isReadable() {
         return buffer.hasRemaining();
+    }
+
+    public ByteBuffer toNio() {
+        return buffer;
     }
 }
