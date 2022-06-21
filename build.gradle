@@ -9,5 +9,26 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    extraLibs
+}
+
 dependencies {
+    compileJava.options.encoding = 'UTF-8'
+
+    extraLibs('com.google.code.gson:gson:2.9.0')
+
+    configurations.implementation.extendsFrom(configurations.extraLibs)
+}
+
+jar {
+    from {
+        configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
 }
