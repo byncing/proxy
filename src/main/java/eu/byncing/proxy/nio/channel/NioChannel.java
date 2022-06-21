@@ -35,8 +35,7 @@ public class NioChannel implements Channel {
 
     @Override
     public void connect(SocketAddress address) throws IOException {
-        socket.connect(address);
-
+        this.socket.connect(address);
         this.address = Address.build(socket);
     }
 
@@ -69,12 +68,14 @@ public class NioChannel implements Channel {
         callback.run(() -> {
             try {
                 NioBuf buffer = new NioBuf(0, false);
-                int readable = buf.readable();
 
-                buffer.enlarge((NioBuf.size(readable) + readable));
+                buf.reset();
+
+                int readable = buf.readable();
                 buffer.writeInt(readable);
                 buffer.writeBuf(buf);
 
+                buffer.reset();
                 socket.write(buffer.toNio());
 
                 callback.complete(future.channel);
@@ -82,6 +83,7 @@ public class NioChannel implements Channel {
                 callback.failure(e);
             }
         });
+
         return callback;
     }
 
@@ -126,7 +128,9 @@ public class NioChannel implements Channel {
             callback.run(() -> {
                 try {
                     channel.socket.close();
+                    callback.complete(channel.future);
                 } catch (IOException e) {
+                    callback.failure(e);
                     throw new RuntimeException(e);
                 }
             });
