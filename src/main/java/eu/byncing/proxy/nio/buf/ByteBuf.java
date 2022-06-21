@@ -40,6 +40,10 @@ public abstract class ByteBuf implements Flushable {
 
     public abstract char readChar();
 
+    public abstract void writeString(String value);
+
+    public abstract String readString();
+
     public abstract void writeBuf(ByteBuf buf);
 
     public abstract void writeBuf(ByteBuffer buf);

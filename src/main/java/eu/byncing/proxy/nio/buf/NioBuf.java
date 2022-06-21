@@ -1,6 +1,7 @@
 package eu.byncing.proxy.nio.buf;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 public class NioBuf extends ByteBuf {
 
@@ -38,13 +39,13 @@ public class NioBuf extends ByteBuf {
 
         int offset = offset();
 
-        offset(0);
-
+        buffer.flip().rewind();
         byteBuffer.put(buffer);
 
         buffer.clear();
         buffer = byteBuffer;
-        buffer.position(offset());
+
+        buffer.position(offset);
     }
 
     @Override
@@ -143,6 +144,32 @@ public class NioBuf extends ByteBuf {
     @Override
     public char readChar() {
         return buffer.getChar();
+    }
+
+    @Override
+    public void writeString(String value) {
+        byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+        int capacity = size(bytes.length) + bytes.length;
+
+        enlarge(capacity);
+        writeInt(bytes.length);
+
+        int position = buffer.position();
+        buffer.put(bytes, 0, bytes.length);
+        buffer.position(position + bytes.length);
+    }
+
+    @Override
+    public String readString() {
+        String result;
+
+        int length = readInt();
+        byte[] bytes = new byte[length];
+
+        for (int i = 0; i < length; i++) bytes[i] = readByte();
+
+        result = new String(bytes, StandardCharsets.UTF_8);
+        return result;
     }
 
     @Override
