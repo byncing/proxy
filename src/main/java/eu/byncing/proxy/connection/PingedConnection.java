@@ -45,4 +45,8 @@ public class PingedConnection implements Connection {
     public int protocol() {
         return protocol;
     }
+
+    public void protocol(int protocol) {
+        this.protocol = protocol;
+    }
 }
